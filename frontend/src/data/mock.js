@@ -92,7 +92,8 @@ export const aiPlatforms = [
 export const contactInfo = {
   headline: "Let's Build Something Exceptional.",
   email: "tanvirahmedtopubd@gmail.com",
-  instagram: "@tanvir.ahmed.topu"
+  instagram: "@tanvir.ahmed.topu",
+  github: "@tanvirahmedtopu"
 };
 
 export const navLinks = [
