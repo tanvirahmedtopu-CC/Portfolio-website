@@ -91,7 +91,7 @@ export const aiPlatforms = [
 
 export const contactInfo = {
   headline: "Let's Build Something Exceptional.",
-  email: "tanvirahmedtopubd@gmail.com",
+  email: "tanvir@tatmedia.xyz",
   instagram: "@tanvir.ahmed.topu",
   github: "@tanvirahmedtopu"
 };
