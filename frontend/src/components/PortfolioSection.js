@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ExternalLink, Play, ChevronRight } from 'lucide-react';
 import { CardSwap, Card } from './CardSwap';
+import SmoothReveal from './ui/SmoothReveal';
+import TextReveal from './ui/TextReveal';
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 const CATEGORIES = [
@@ -102,7 +104,7 @@ const ICONS_3D = {
   aiGenerated: AIGeneratedIcon3D,
 };
 
-// ─── VIEW BADGE (Instagram/TikTok style) ──────────────────────────────────────
+// ─── VIEW BADGE ───────────────────────────────────────────────────────────────
 const ViewBadge = ({ views }) => (
   <div
     className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md"
@@ -112,7 +114,6 @@ const ViewBadge = ({ views }) => (
       border: '1px solid rgba(255,255,255,0.1)',
     }}
   >
-    {/* Instagram-style eye icon */}
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
       <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z"
         stroke="white" strokeWidth="2" strokeLinejoin="round"/>
@@ -125,94 +126,117 @@ const ViewBadge = ({ views }) => (
   </div>
 );
 
-// ─── CATEGORY CARD ────────────────────────────────────────────────────────────
-const CategoryCard = ({ category, isHovered }) => (
-  <div
-    className="w-full h-full rounded-2xl overflow-hidden relative select-none"
-    style={{
-      background: '#08090f',
-      border: `1px solid ${isHovered ? category.accent + '55' : 'rgba(255,255,255,0.09)'}`,
-      boxShadow: isHovered
-        ? `0 0 60px ${category.glow}, 0 20px 60px rgba(0,0,0,0.7), inset 0 1px 0 ${category.accent}25`
-        : `0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)`,
-      transition: 'border-color 0.4s ease, box-shadow 0.4s ease',
-    }}
-  >
-    {/* Top shimmer */}
-    <div className="absolute top-0 left-0 right-0 h-px z-10" style={{
-      background: isHovered
-        ? `linear-gradient(90deg, transparent, ${category.accent}80, transparent)`
-        : 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
-      transition: 'background 0.4s ease',
-    }} />
+// ─── CATEGORY CARD (3D TILT) ──────────────────────────────────────────────────
+const CategoryCard = ({ category, isHovered }) => {
+  const cardRef = useRef(null);
+  const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
 
-    {/* Thumbnail — fills top 65% */}
-    <div className="absolute top-0 left-0 right-0" style={{ height: '65%' }}>
-      <img
-        src={category.thumbnail}
-        alt={category.label}
-        className="w-full h-full object-cover"
-        style={{ objectPosition: 'center top' }}
-      />
-      {/* Gradient fade */}
-      <div className="absolute inset-0" style={{
-        background: 'linear-gradient(to bottom, transparent 35%, rgba(8,9,15,0.55) 75%, #08090f 100%)',
+  const handleMouseMove = useCallback((e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    setTilt({
+      rotateX: (y - 0.5) * -8,
+      rotateY: (x - 0.5) * 8,
+    });
+  }, []);
+
+  const handleMouseLeave = () => setTilt({ rotateX: 0, rotateY: 0 });
+
+  return (
+    <div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="w-full h-full rounded-2xl overflow-hidden relative select-none"
+      style={{
+        background: '#08090f',
+        border: `1px solid ${isHovered ? category.accent + '55' : 'rgba(255,255,255,0.09)'}`,
+        boxShadow: isHovered
+          ? `0 0 60px ${category.glow}, 0 20px 60px rgba(0,0,0,0.7), inset 0 1px 0 ${category.accent}25`
+          : `0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)`,
+        transition: 'border-color 0.4s ease, box-shadow 0.4s ease',
+        transform: `perspective(800px) rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg)`,
+        transformStyle: 'preserve-3d',
+      }}
+    >
+      {/* Top shimmer */}
+      <div className="absolute top-0 left-0 right-0 h-px z-10" style={{
+        background: isHovered
+          ? `linear-gradient(90deg, transparent, ${category.accent}80, transparent)`
+          : 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
+        transition: 'background 0.4s ease',
       }} />
-      {/* Accent tint */}
-      <div className="absolute inset-0" style={{
-        background: `linear-gradient(135deg, ${category.accent}20 0%, transparent 55%)`,
-        opacity: isHovered ? 1 : 0.55,
-        transition: 'opacity 0.4s ease',
-      }} />
 
-      {/* View badge — bottom-left */}
-      <div className="absolute bottom-3 left-3 z-10">
-        <ViewBadge views={category.views} />
-      </div>
+      {/* Thumbnail */}
+      <div className="absolute top-0 left-0 right-0" style={{ height: '65%' }}>
+        <img
+          src={category.thumbnail}
+          alt={category.label}
+          className="w-full h-full object-cover"
+          style={{ objectPosition: 'center top' }}
+        />
+        <div className="absolute inset-0" style={{
+          background: 'linear-gradient(to bottom, transparent 35%, rgba(8,9,15,0.55) 75%, #08090f 100%)',
+        }} />
+        <div className="absolute inset-0" style={{
+          background: `linear-gradient(135deg, ${category.accent}20 0%, transparent 55%)`,
+          opacity: isHovered ? 1 : 0.55,
+          transition: 'opacity 0.4s ease',
+        }} />
 
-      {/* Play overlay on hover */}
-      <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"
-        style={{ opacity: isHovered ? 1 : 0, transition: 'opacity 0.3s ease' }}>
-        <div className="w-12 h-12 rounded-full flex items-center justify-center"
-          style={{
-            background: `${category.accent}25`,
-            border: `1px solid ${category.accent}70`,
-            backdropFilter: 'blur(10px)',
-          }}>
-          <Play size={18} fill={category.accent} style={{ color: category.accent, marginLeft: 2 }} />
+        <div className="absolute bottom-3 left-3 z-10">
+          <ViewBadge views={category.views} />
+        </div>
+
+        <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"
+          style={{ opacity: isHovered ? 1 : 0, transition: 'opacity 0.3s ease' }}>
+          <motion.div 
+            className="w-12 h-12 rounded-full flex items-center justify-center"
+            style={{
+              background: `${category.accent}25`,
+              border: `1px solid ${category.accent}70`,
+              backdropFilter: 'blur(10px)',
+            }}
+            animate={isHovered ? { scale: [1, 1.1, 1] } : {}}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            <Play size={18} fill={category.accent} style={{ color: category.accent, marginLeft: 2 }} />
+          </motion.div>
         </div>
       </div>
+
+      {/* Glass divider */}
+      <div className="absolute left-4 right-4 z-10" style={{
+        top: 'calc(65% - 1px)',
+        height: '1px',
+        background: `linear-gradient(90deg, transparent, ${isHovered ? category.accent + '40' : 'rgba(255,255,255,0.07)'}, transparent)`,
+        transition: 'background 0.4s ease',
+      }} />
+
+      {/* Text */}
+      <div className="absolute bottom-0 left-0 right-0 p-5" style={{ height: '35%' }}>
+        <span className="text-xs font-mono tracking-[0.2em] block mb-1" style={{ color: category.accent, opacity: 0.8 }}>
+          {category.tag}
+        </span>
+        <h3 className="text-white font-semibold text-base leading-tight mb-1"
+          style={{ letterSpacing: '-0.02em' }}>
+          {category.label}
+        </h3>
+        <p className="text-xs font-mono" style={{ color: category.accent, opacity: 0.5 }}>
+          {category.sublabel}
+        </p>
+      </div>
+
+      {/* Bottom accent line */}
+      <div className="absolute bottom-0 left-0 right-0 h-px z-10" style={{
+        background: `linear-gradient(90deg, transparent, ${category.accent}${isHovered ? '60' : '22'}, transparent)`,
+        transition: 'background 0.4s ease',
+      }} />
     </div>
-
-    {/* Glass divider */}
-    <div className="absolute left-4 right-4 z-10" style={{
-      top: 'calc(65% - 1px)',
-      height: '1px',
-      background: `linear-gradient(90deg, transparent, ${isHovered ? category.accent + '40' : 'rgba(255,255,255,0.07)'}, transparent)`,
-      transition: 'background 0.4s ease',
-    }} />
-
-    {/* Text — bottom 35% */}
-    <div className="absolute bottom-0 left-0 right-0 p-5" style={{ height: '35%' }}>
-      <span className="text-xs font-mono tracking-[0.2em] block mb-1" style={{ color: category.accent, opacity: 0.8 }}>
-        {category.tag}
-      </span>
-      <h3 className="text-white font-semibold text-base leading-tight mb-1"
-        style={{ letterSpacing: '-0.02em' }}>
-        {category.label}
-      </h3>
-      <p className="text-xs font-mono" style={{ color: category.accent, opacity: 0.5 }}>
-        {category.sublabel}
-      </p>
-    </div>
-
-    {/* Bottom accent line */}
-    <div className="absolute bottom-0 left-0 right-0 h-px z-10" style={{
-      background: `linear-gradient(90deg, transparent, ${category.accent}${isHovered ? '60' : '22'}, transparent)`,
-      transition: 'background 0.4s ease',
-    }} />
-  </div>
-);
+  );
+};
 
 // ─── MODAL ────────────────────────────────────────────────────────────────────
 const CategoryModal = ({ category, onClose }) => (
@@ -223,10 +247,10 @@ const CategoryModal = ({ category, onClose }) => (
     onClick={onClose}
   >
     <motion.div
-      initial={{ scale: 0.93, opacity: 0, y: 24 }}
-      animate={{ scale: 1, opacity: 1, y: 0 }}
-      exit={{ scale: 0.93, opacity: 0, y: 24 }}
-      transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
+      initial={{ scale: 0.9, opacity: 0, y: 30, filter: 'blur(10px)' }}
+      animate={{ scale: 1, opacity: 1, y: 0, filter: 'blur(0px)' }}
+      exit={{ scale: 0.9, opacity: 0, y: 30, filter: 'blur(10px)' }}
+      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
       className="relative max-w-5xl w-full my-8 rounded-3xl overflow-hidden"
       style={{
         background: 'linear-gradient(145deg, #0d0f18 0%, #090b12 100%)',
@@ -250,7 +274,7 @@ const CategoryModal = ({ category, onClose }) => (
           <p className="text-white/40 text-sm">{category.description}</p>
         </div>
         <button onClick={onClose}
-          className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
+          className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-1 transition-all duration-300 hover:bg-white/10"
           style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
           <X size={17} className="text-white/60" />
         </button>
@@ -258,10 +282,14 @@ const CategoryModal = ({ category, onClose }) => (
 
       <div className="p-8">
         <div className="text-center py-14">
-          <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6"
-            style={{ background: `${category.accent}10`, border: `1px solid ${category.accent}22`, boxShadow: `0 0 30px ${category.glow}` }}>
+          <motion.div 
+            className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6"
+            style={{ background: `${category.accent}10`, border: `1px solid ${category.accent}22`, boxShadow: `0 0 30px ${category.glow}` }}
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          >
             <Play size={30} style={{ color: category.accent }} fill="currentColor" />
-          </div>
+          </motion.div>
           <p className="text-white text-base font-medium mb-2">{category.label}</p>
           <p className="text-white/35 text-sm mb-8 max-w-xs mx-auto leading-relaxed">
             Browse the full collection of {category.label.toLowerCase()} videos.
@@ -300,35 +328,32 @@ const PortfolioSection = () => {
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-20">
-          <motion.span initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            className="text-cyan-400 text-xs font-mono tracking-[0.25em] uppercase mb-4 block">
-            Selected Work
-          </motion.span>
-          <motion.h2 initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            transition={{ delay: 0.08 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-4"
-            style={{ letterSpacing: '-0.03em' }}>
-            The{' '}
-            <span className="bg-gradient-to-r from-cyan-300 via-blue-300 to-violet-400 bg-clip-text text-transparent">
-              Portfolio
+          <SmoothReveal blur delay={0}>
+            <span className="text-cyan-400 text-xs font-mono tracking-[0.25em] uppercase mb-4 block">
+              Selected Work
             </span>
-          </motion.h2>
-          <motion.p initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            transition={{ delay: 0.15 }}
-            className="text-white/30 max-w-md mx-auto text-sm leading-relaxed">
-            Three categories. One consistent standard — content that performs.
-          </motion.p>
+          </SmoothReveal>
+
+          <TextReveal
+            text="The Portfolio"
+            highlightWords={['Portfolio']}
+            className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-4 justify-center"
+            staggerDelay={0.08}
+            delay={0.1}
+          />
+
+          <SmoothReveal blur delay={0.3}>
+            <p className="text-white/30 max-w-md mx-auto text-sm leading-relaxed">
+              Three categories. One consistent standard — content that performs.
+            </p>
+          </SmoothReveal>
         </div>
 
         {/* Layout */}
         <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-16 lg:gap-28">
 
           {/* CardSwap */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-            className="flex-shrink-0"
-          >
+          <SmoothReveal direction="left" blur delay={0.1} className="flex-shrink-0">
             <p className="text-white/20 text-xs font-mono text-center mb-4 tracking-widest uppercase">
               Hover to preview · Click to explore
             </p>
@@ -344,9 +369,9 @@ const PortfolioSection = () => {
                 </Card>
               ))}
             </CardSwap>
-          </motion.div>
+          </SmoothReveal>
 
-          {/* Category list — right side */}
+          {/* Category list */}
           <motion.div
             initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }} transition={{ duration: 0.65, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
@@ -359,8 +384,10 @@ const PortfolioSection = () => {
               return (
                 <motion.button
                   key={cat.key}
-                  initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }} transition={{ delay: 0.18 + i * 0.09 }}
+                  initial={{ opacity: 0, x: 20, filter: 'blur(5px)' }}
+                  whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.18 + i * 0.09, duration: 0.5 }}
                   onClick={() => setActiveCategory(cat)}
                   className="group flex items-center justify-between px-5 py-4 rounded-2xl text-left transition-all duration-300 cursor-pointer"
                   style={{
@@ -428,6 +455,9 @@ const PortfolioSection = () => {
           <CategoryModal category={activeCategory} onClose={() => setActiveCategory(null)} />
         )}
       </AnimatePresence>
+      
+      {/* Section separator */}
+      <div className="absolute bottom-0 left-0 right-0 section-separator" />
     </section>
   );
 };

@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, Play } from 'lucide-react';
 import { heroContent } from '../data/mock';
+import MagneticButton from './ui/MagneticButton';
+import FloatingParticles from './ui/FloatingParticles';
 
 // ─── RANDOM COLOR HELPERS ─────────────────────────────────────────────────────
 const randomHex = () =>
@@ -10,8 +12,6 @@ const randomHex = () =>
 const randomColors = (count) => Array.from({ length: count }, randomHex);
 
 // ─── TUBES BACKGROUND ─────────────────────────────────────────────────────────
-// Uses webpackIgnore so CRA/webpack leaves the CDN import alone
-// and the browser handles it as a native ES module — no build error.
 const TubesBackground = ({ onClick }) => {
   const canvasRef = useRef(null);
   const tubesRef = useRef(null);
@@ -22,7 +22,6 @@ const TubesBackground = ({ onClick }) => {
     const init = async () => {
       if (!canvasRef.current) return;
       try {
-        // webpackIgnore tells webpack to skip this — browser handles it natively
         const module = await import(
           /* webpackIgnore: true */
           'https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js'
@@ -69,28 +68,69 @@ const TubesBackground = ({ onClick }) => {
 
 // ─── HERO SECTION ─────────────────────────────────────────────────────────────
 const HeroSection = () => {
-  const [clickHint, setClickHint] = useState(false);
+  const sectionRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start start', 'end start'],
+  });
+
+  // Parallax transforms
+  const contentY = useTransform(scrollYProgress, [0, 1], [0, 150]);
+  const overlayOpacity = useTransform(scrollYProgress, [0, 0.5], [0.72, 0.95]);
 
   const scrollToSection = (href) => {
     const el = document.querySelector(href);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Word-by-word stagger container
+  const containerVariants = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.08,
+        delayChildren: 0.3,
+      },
+    },
+  };
+
+  const wordVariants = {
+    hidden: { opacity: 0, y: 30, filter: 'blur(10px)' },
+    visible: {
+      opacity: 1,
+      y: 0,
+      filter: 'blur(0px)',
+      transition: { duration: 0.7, ease: [0.25, 0.1, 0.25, 1] },
+    },
+  };
+
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
-
+    <section
+      ref={sectionRef}
+      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black"
+    >
       {/* Tubes canvas */}
-      <TubesBackground onClick={() => setClickHint(true)} />
+      <TubesBackground />
 
-      {/* Overlay: darkens center (text area) more than edges (where tubes live) */}
-      <div
+      {/* Three.js floating particles overlay */}
+      <FloatingParticles
+        count={60}
+        color="#22d3ee"
+        speed={0.2}
+        style={{ zIndex: 1, opacity: 0.5 }}
+      />
+
+      {/* Overlay with parallax */}
+      <motion.div
         className="absolute inset-0 pointer-events-none"
         style={{
           background: 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.3) 100%)',
           zIndex: 1,
+          opacity: overlayOpacity,
         }}
       />
-      {/* Top/bottom edge fade to black */}
+
+      {/* Top/bottom edge fade */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -99,13 +139,17 @@ const HeroSection = () => {
         }}
       />
 
-      {/* Content */}
-      <div className="relative max-w-5xl mx-auto px-6 lg:px-8 text-center" style={{ zIndex: 2 }}>
-
+      {/* Content with parallax */}
+      <motion.div
+        className="relative max-w-5xl mx-auto px-6 lg:px-8 text-center"
+        style={{ zIndex: 2, y: contentY }}
+      >
         {/* Tagline pill */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.2 }} className="mb-8"
+          initial={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          transition={{ duration: 1, delay: 0.2 }}
+          className="mb-8"
         >
           <span className="inline-flex items-center gap-2 px-4 py-2 bg-white/[0.06] backdrop-blur-xl border border-white/[0.1] rounded-full text-white/70 text-sm">
             <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
@@ -113,64 +157,75 @@ const HeroSection = () => {
           </span>
         </motion.div>
 
-        {/* Headline */}
+        {/* Headline — word-by-word blur reveal */}
         <motion.h1
-          initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.4 }}
-          className="text-4xl md:text-6xl lg:text-7xl font-semibold text-white leading-[1.1] tracking-tight mb-8"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="text-4xl md:text-6xl lg:text-7xl font-semibold text-white leading-[1.1] tracking-tight mb-8 flex flex-wrap justify-center"
         >
           {heroContent.headline.split(' ').map((word, i) => (
             <motion.span
               key={i}
+              variants={wordVariants}
               className={`inline-block mr-3 ${
                 word === 'Cinematic' || word === 'Convert'
                   ? 'bg-gradient-to-r from-cyan-300 to-blue-400 bg-clip-text text-transparent'
                   : ''
               }`}
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 + i * 0.1 }}
+              style={{ willChange: 'transform, opacity, filter' }}
             >
               {word}
             </motion.span>
           ))}
         </motion.h1>
 
-        {/* Subtext */}
+        {/* Subtext — blur reveal */}
         <motion.p
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.8 }}
+          initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          transition={{ duration: 1, delay: 0.9 }}
           className="text-lg md:text-xl text-white/60 max-w-2xl mx-auto mb-12 leading-relaxed"
         >
           {heroContent.subtext}
         </motion.p>
 
-        {/* CTAs */}
+        {/* CTAs with magnetic hover */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 1 }}
+          initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          transition={{ duration: 1, delay: 1.1 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <motion.button
-            onClick={() => scrollToSection('#portfolio')}
-            className="group flex items-center gap-3 px-8 py-4 bg-white text-black rounded-full font-medium text-base transition-all duration-500 hover:shadow-[0_0_40px_rgba(255,255,255,0.2)]"
-            whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-          >
-            <Play size={18} className="fill-current" />
-            {heroContent.ctaPrimary}
-            <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
-          </motion.button>
+          <MagneticButton strength={0.15}>
+            <motion.button
+              onClick={() => scrollToSection('#portfolio')}
+              className="group flex items-center gap-3 px-8 py-4 bg-white text-black rounded-full font-medium text-base transition-all duration-500 hover:shadow-[0_0_50px_rgba(255,255,255,0.25)] relative overflow-hidden"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {/* Shimmer sweep */}
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+              <Play size={18} className="fill-current relative z-10" />
+              <span className="relative z-10">{heroContent.ctaPrimary}</span>
+              <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1 relative z-10" />
+            </motion.button>
+          </MagneticButton>
 
-          <motion.button
-            onClick={() => scrollToSection('#contact')}
-            className="flex items-center gap-3 px-8 py-4 bg-white/[0.08] backdrop-blur-xl border border-white/[0.15] rounded-full text-white font-medium text-base transition-all duration-500 hover:bg-white/[0.12] hover:border-white/[0.25]"
-            whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-          >
-            {heroContent.ctaSecondary}
-          </motion.button>
+          <MagneticButton strength={0.15}>
+            <motion.button
+              onClick={() => scrollToSection('#contact')}
+              className="flex items-center gap-3 px-8 py-4 bg-white/[0.08] backdrop-blur-xl border border-white/[0.15] rounded-full text-white font-medium text-base transition-all duration-500 hover:bg-white/[0.12] hover:border-white/[0.25]"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {heroContent.ctaSecondary}
+            </motion.button>
+          </MagneticButton>
         </motion.div>
-      </div>
+      </motion.div>
 
-      {/* Click to randomize hint */}
+      {/* Click hint */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -183,9 +238,10 @@ const HeroSection = () => {
         </p>
       </motion.div>
 
-      {/* Scroll indicator */}
+      {/* Scroll indicator — enhanced */}
       <motion.div
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         transition={{ delay: 1.5, duration: 1 }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2"
         style={{ zIndex: 2 }}

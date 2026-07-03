@@ -1,15 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-
-// ─── Load Sora font (premium, geometric, not overused) ────────────────────────
-// Add this once — it checks if already injected
-if (typeof document !== 'undefined' && !document.getElementById('sora-font')) {
-  const link = document.createElement('link');
-  link.id = 'sora-font';
-  link.rel = 'stylesheet';
-  link.href = 'https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap';
-  document.head.appendChild(link);
-}
+import SmoothReveal from './ui/SmoothReveal';
+import TextReveal from './ui/TextReveal';
 
 // ─── SERVICE DATA ─────────────────────────────────────────────────────────────
 const SERVICES = [
@@ -18,7 +10,7 @@ const SERVICES = [
     title: 'Content Creation',
     description:
       'Short-form and long-form content designed to capture attention, stop the scroll, and drive real engagement.',
-    accent: '#22d3ee',   // cyan
+    accent: '#22d3ee',
     glow: 'rgba(34, 211, 238, 0.15)',
     icon: (
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
@@ -34,7 +26,7 @@ const SERVICES = [
     title: 'Social Media Growth',
     description:
       'Strategic content and platform optimisation to grow audiences organically on TikTok, YouTube, and Instagram.',
-    accent: '#a78bfa',   // violet
+    accent: '#a78bfa',
     glow: 'rgba(167, 139, 250, 0.15)',
     icon: (
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
@@ -52,7 +44,7 @@ const SERVICES = [
     title: 'Video Editing',
     description:
       'Cinematic pacing, colour grading, and storytelling that transforms raw footage into content that converts viewers into followers.',
-    accent: '#34d399',   // emerald
+    accent: '#34d399',
     glow: 'rgba(52, 211, 153, 0.15)',
     icon: (
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
@@ -68,13 +60,12 @@ const SERVICES = [
     title: 'AI Content Systems',
     description:
       'Leveraging Veo, Kling, Runway, and other frontier tools to scale content production and automate marketing workflows.',
-    accent: '#38bdf8',   // sky
+    accent: '#38bdf8',
     glow: 'rgba(56, 189, 248, 0.15)',
     icon: (
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
         <circle cx="14" cy="14" r="4" stroke="currentColor" strokeWidth="1.5" fill="none" />
         <circle cx="14" cy="14" r="1.5" fill="currentColor" />
-        {/* Orbit rings */}
         <ellipse cx="14" cy="14" rx="10" ry="4" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" fill="none" />
         <ellipse cx="14" cy="14" rx="10" ry="4" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" fill="none"
           transform="rotate(60 14 14)" />
@@ -85,26 +76,44 @@ const SERVICES = [
   },
 ];
 
-// ─── SERVICE CARD ─────────────────────────────────────────────────────────────
+// ─── SERVICE CARD WITH 3D TILT ────────────────────────────────────────────────
 const ServiceCard = ({ service, index }) => {
   const [hovered, setHovered] = useState(false);
+  const cardRef = useRef(null);
+  const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
+  const [glowPos, setGlowPos] = useState({ x: 50, y: 50 });
+
+  const handleMouseMove = useCallback((e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    setTilt({
+      rotateX: (y - 0.5) * -10,
+      rotateY: (x - 0.5) * 10,
+    });
+    setGlowPos({ x: x * 100, y: y * 100 });
+  }, []);
+
+  const handleMouseLeave = () => {
+    setTilt({ rotateX: 0, rotateY: 0 });
+    setGlowPos({ x: 50, y: 50 });
+    setHovered(false);
+  };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 32 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 32, filter: 'blur(8px)' }}
+      whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
       viewport={{ once: true }}
-      transition={{ duration: 0.55, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.6, delay: index * 0.12, ease: [0.16, 1, 0.3, 1] }}
       onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      ref={cardRef}
       style={{ fontFamily: "'Sora', sans-serif" }}
     >
-      <motion.div
-        animate={{
-          y: hovered ? -6 : 0,
-          scale: hovered ? 1.015 : 1,
-        }}
-        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      <div
         className="relative h-full rounded-2xl p-7 cursor-default overflow-hidden"
         style={{
           background: hovered
@@ -116,10 +125,22 @@ const ServiceCard = ({ service, index }) => {
           boxShadow: hovered
             ? `0 0 0 1px ${service.accent}20, 0 20px 60px ${service.glow}, 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)`
             : `0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)`,
-          transition: 'background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease',
+          transition: 'background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease, transform 0.15s ease-out',
+          transform: `perspective(800px) rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) ${hovered ? 'scale3d(1.02,1.02,1.02)' : ''}`,
+          transformStyle: 'preserve-3d',
         }}
       >
-        {/* Top accent line — glows on hover */}
+        {/* Cursor-following glow */}
+        <div
+          className="absolute inset-0 pointer-events-none rounded-2xl"
+          style={{
+            background: `radial-gradient(circle at ${glowPos.x}% ${glowPos.y}%, ${service.accent}15 0%, transparent 60%)`,
+            opacity: hovered ? 1 : 0,
+            transition: 'opacity 0.3s ease',
+          }}
+        />
+
+        {/* Top accent line */}
         <div
           className="absolute top-0 left-6 right-6 h-px rounded-full"
           style={{
@@ -130,7 +151,7 @@ const ServiceCard = ({ service, index }) => {
           }}
         />
 
-        {/* Ambient glow blob — top right corner */}
+        {/* Ambient glow blob */}
         <div
           className="absolute -top-8 -right-8 w-32 h-32 rounded-full pointer-events-none"
           style={{
@@ -141,19 +162,19 @@ const ServiceCard = ({ service, index }) => {
         />
 
         {/* Icon */}
-        <div
+        <motion.div
           className="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-5"
           style={{
-            background: hovered
-              ? `${service.accent}18`
-              : 'rgba(255,255,255,0.05)',
+            background: hovered ? `${service.accent}18` : 'rgba(255,255,255,0.05)',
             border: `1px solid ${hovered ? service.accent + '30' : 'rgba(255,255,255,0.08)'}`,
             color: hovered ? service.accent : 'rgba(255,255,255,0.6)',
             transition: 'all 0.4s ease',
           }}
+          animate={hovered ? { rotate: [0, 5, -5, 0] } : {}}
+          transition={{ duration: 0.6, ease: 'easeInOut' }}
         >
           {service.icon}
-        </div>
+        </motion.div>
 
         {/* Number tag */}
         <div
@@ -189,7 +210,7 @@ const ServiceCard = ({ service, index }) => {
           {service.description}
         </p>
 
-        {/* Bottom accent — subtle colored line */}
+        {/* Bottom accent */}
         <div
           className="absolute bottom-0 left-0 right-0 h-px"
           style={{
@@ -197,7 +218,7 @@ const ServiceCard = ({ service, index }) => {
             transition: 'background 0.4s ease',
           }}
         />
-      </motion.div>
+      </div>
     </motion.div>
   );
 };
@@ -210,10 +231,8 @@ const ServicesSection = () => {
       className="relative py-28 overflow-hidden"
       style={{ fontFamily: "'Sora', sans-serif" }}
     >
-      {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-black via-[#05070d] to-black" />
 
-      {/* Ambient glow — matches site palette */}
       <motion.div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] rounded-full pointer-events-none"
         style={{ background: 'radial-gradient(ellipse, rgba(34,211,238,0.03) 0%, transparent 70%)' }}
@@ -222,55 +241,34 @@ const ServicesSection = () => {
       />
 
       <div className="relative z-10 max-w-5xl mx-auto px-6 lg:px-8">
-
         {/* Header */}
         <div className="text-center mb-16">
-          <motion.span
-            initial={{ opacity: 0, y: 14 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="block text-xs font-mono tracking-[0.28em] uppercase mb-4"
-            style={{ color: '#22d3ee', fontFamily: "'Sora', sans-serif" }}
-          >
-            What I Do
-          </motion.span>
-
-          <motion.h2
-            initial={{ opacity: 0, y: 14 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.08 }}
-            className="text-4xl md:text-5xl font-semibold text-white mb-4"
-            style={{
-              letterSpacing: '-0.03em',
-              fontFamily: "'Sora', sans-serif",
-            }}
-          >
-            Services &{' '}
+          <SmoothReveal blur>
             <span
-              style={{
-                background: 'linear-gradient(90deg, #22d3ee, #818cf8)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
+              className="block text-xs font-mono tracking-[0.28em] uppercase mb-4"
+              style={{ color: '#22d3ee', fontFamily: "'Sora', sans-serif" }}
             >
-              Expertise
+              What I Do
             </span>
-          </motion.h2>
+          </SmoothReveal>
 
-          <motion.p
-            initial={{ opacity: 0, y: 14 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.14 }}
-            className="text-sm leading-relaxed max-w-sm mx-auto"
-            style={{
-              color: 'rgba(255,255,255,0.3)',
-              fontFamily: "'Sora', sans-serif",
-            }}
-          >
-            End-to-end content and marketing solutions — built for brands that want to grow.
-          </motion.p>
+          <TextReveal
+            text="Services & Expertise"
+            highlightWords={['Expertise']}
+            highlightClass="bg-gradient-to-r from-cyan-300 to-indigo-400 bg-clip-text text-transparent"
+            className="text-4xl md:text-5xl font-semibold text-white mb-4 justify-center"
+            staggerDelay={0.07}
+            delay={0.1}
+          />
+
+          <SmoothReveal blur delay={0.3}>
+            <p
+              className="text-sm leading-relaxed max-w-sm mx-auto"
+              style={{ color: 'rgba(255,255,255,0.3)', fontFamily: "'Sora', sans-serif" }}
+            >
+              End-to-end content and marketing solutions — built for brands that want to grow.
+            </p>
+          </SmoothReveal>
         </div>
 
         {/* 2×2 Grid */}
@@ -280,6 +278,8 @@ const ServicesSection = () => {
           ))}
         </div>
       </div>
+      
+      <div className="absolute bottom-0 left-0 right-0 section-separator" />
     </section>
   );
 };
