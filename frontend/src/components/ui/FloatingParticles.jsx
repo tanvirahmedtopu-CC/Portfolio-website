@@ -85,7 +85,7 @@ const FloatingParticles = ({
         camera={{ position: [0, 0, 5], fov: 75 }}
         dpr={[1, 1.5]}
         gl={{ alpha: true, antialias: false }}
-        style={{ background: 'transparent' }}
+        style={{ background: 'transparent', pointerEvents: 'none' }}
       >
         <Particles count={count} color={color} speed={speed} />
       </Canvas>
