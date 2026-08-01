@@ -139,9 +139,10 @@ const HeroSection = () => {
         }}
       />
 
-      {/* Content with parallax */}
+      {/* Content with parallax — pointer-events-none on mobile lets taps
+          pass through to the tubes canvas; md+ restores normal behavior */}
       <motion.div
-        className="relative max-w-5xl mx-auto px-6 lg:px-8 text-center"
+        className="relative max-w-5xl mx-auto px-6 lg:px-8 text-center pointer-events-none md:pointer-events-auto"
         style={{ zIndex: 2, y: contentY }}
       >
         {/* Tagline pill */}
@@ -149,9 +150,9 @@ const HeroSection = () => {
           initial={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 1, delay: 0.2 }}
-          className="mb-8"
+          className="mb-4 md:mb-8"
         >
-          <span className="inline-flex items-center gap-2 px-4 py-2 bg-white/[0.06] backdrop-blur-xl border border-white/[0.1] rounded-full text-white/70 text-sm">
+          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 md:px-4 md:py-2 bg-white/[0.06] backdrop-blur-xl border border-white/[0.1] rounded-full text-white/70 text-xs md:text-sm">
             <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
             Content Creation & Digital Marketing | AI Powered
           </span>
@@ -162,7 +163,7 @@ const HeroSection = () => {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="text-4xl md:text-6xl lg:text-7xl font-semibold text-white leading-[1.1] tracking-tight mb-8 flex flex-wrap justify-center"
+          className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-semibold text-white leading-[1.15] md:leading-[1.1] tracking-tight mb-6 md:mb-8 flex flex-wrap justify-center"
         >
           {heroContent.headline.split(' ').map((word, i) => (
             <motion.span
@@ -185,7 +186,7 @@ const HeroSection = () => {
           initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 1, delay: 0.9 }}
-          className="text-lg md:text-xl text-white/60 max-w-2xl mx-auto mb-12 leading-relaxed"
+          className="text-base sm:text-lg md:text-xl text-white/60 max-w-2xl mx-auto mb-8 md:mb-12 leading-relaxed"
         >
           {heroContent.subtext}
         </motion.p>
@@ -195,12 +196,12 @@ const HeroSection = () => {
           initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 1, delay: 1.1 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 pointer-events-auto"
         >
           <MagneticButton strength={0.15}>
             <motion.button
               onClick={() => scrollToSection('#portfolio')}
-              className="group flex items-center gap-3 px-8 py-4 bg-white text-black rounded-full font-medium text-base transition-all duration-500 hover:shadow-[0_0_50px_rgba(255,255,255,0.25)] relative overflow-hidden"
+              className="group flex items-center gap-3 px-6 py-3.5 sm:px-8 sm:py-4 bg-white text-black rounded-full font-medium text-sm sm:text-base transition-all duration-500 hover:shadow-[0_0_50px_rgba(255,255,255,0.25)] relative overflow-hidden"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -215,7 +216,7 @@ const HeroSection = () => {
           <MagneticButton strength={0.15}>
             <motion.button
               onClick={() => scrollToSection('#contact')}
-              className="flex items-center gap-3 px-8 py-4 bg-white/[0.08] backdrop-blur-xl border border-white/[0.15] rounded-full text-white font-medium text-base transition-all duration-500 hover:bg-white/[0.12] hover:border-white/[0.25]"
+              className="flex items-center gap-3 px-6 py-3.5 sm:px-8 sm:py-4 bg-white/[0.08] backdrop-blur-xl border border-white/[0.15] rounded-full text-white font-medium text-sm sm:text-base transition-all duration-500 hover:bg-white/[0.12] hover:border-white/[0.25]"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -230,7 +231,7 @@ const HeroSection = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2.5, duration: 1 }}
-        className="absolute bottom-20 left-1/2 -translate-x-1/2 pointer-events-none"
+        className="hidden sm:block absolute bottom-20 left-1/2 -translate-x-1/2 pointer-events-none"
         style={{ zIndex: 2 }}
       >
         <p className="text-white/20 text-xs font-mono tracking-widest uppercase">
