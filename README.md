@@ -16,7 +16,7 @@ Review the result, then commit and push. The publishing script preserves `CNAME`
 
 ## Portfolio media
 
-The 12 supplied samples are delivered as local H.264/AAC MP4s. Each has a small silent 7-second preview, a JPEG poster, and a full-length 720-pixel-wide web copy. Originals stay outside the repository. Full films load when a viewer opens the player. Previews load in view and pause when offscreen, when the tab is hidden, when a film opens, or when the visitor pauses them. Reduced-motion and data-saving preferences keep static posters.
+The 12 supplied samples are delivered as local H.264/AAC MP4s. Each has a small silent 7-second preview, a JPEG poster, and a full-length 720-pixel-wide web copy. Originals stay outside the repository. Full films load when a viewer opens the player. The front cover previews only while a stack is hovered or focused, and pauses offscreen, when the tab is hidden, or when a collection opens. Reduced-motion and data-saving preferences keep static posters.
 
 To rebuild media (requires Python 3 and FFmpeg):
 
@@ -28,7 +28,7 @@ Edit the media mapping in that script; it generates `frontend/src/data/selectedW
 
 ## Interactions
 
-- Portfolio category filters, scroll-linked parallax and accessible Radix video dialog.
+- Three compact folder stacks with spring-driven hover fans. Each opens a collection window; choose a film to play, use Back or Escape to return to the collection, and Escape again to close. Mobile uses a horizontal stack shelf.
 - Brand phones follow page scroll on wide, tall desktop screens. Mobile, short screens and reduced-motion visitors get a native horizontal gallery. Arrow keys, Home and End work on the focused desktop gallery.
 - AI workflow content and vendor source URLs live in `frontend/src/data/aiWorkflow.js` (verified September 28, 2026).
 - Contact form creates an email draft; it does **not** claim a message was sent. No server or email delivery service is configured.

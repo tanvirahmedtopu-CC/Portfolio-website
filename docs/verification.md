@@ -13,3 +13,12 @@
 - `git diff --check` passes.
 
 Reduced motion and Save-Data fallbacks are implemented. Physical-device Safari and Android testing was not performed. The contact form opens an email draft and preserves its content; it does not provide server-side delivery.
+
+## Compact stack revision
+
+- Replaced the twelve-card page grid with three folder stacks and on-demand collection windows.
+- Desktop hover checked: rear covers fan left/right and front preview lifts and plays.
+- Short-form collection opens all four films; playback confirmed.
+- Escape from film returns to collection and focuses that film. A second Escape closes and restores focus to the originating stack.
+- Production build passes after removing obsolete gallery CSS.
+- Mobile at 390 px: no page overflow; the three stacks use one horizontal shelf. AI collection opens three films in a two-column dialog. Full video confirmed playing at readyState 4.
