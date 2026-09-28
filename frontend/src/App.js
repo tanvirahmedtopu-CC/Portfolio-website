@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, MotionConfig } from "framer-motion";
 import "./App.css";
+import "./studio.css";
 
 // Hooks
 import useSmoothScroll from "./hooks/useSmoothScroll";
@@ -90,7 +91,8 @@ function App() {
   useSmoothScroll();
 
   return (
-    <div className="App bg-black min-h-screen">
+    <MotionConfig reducedMotion="user"><div className="App bg-black min-h-screen">
+      <a className="skip-link" href="#portfolio">Skip to selected work</a>
       {/* Page load animation */}
       <AnimatePresence>
         {loading && <PageLoader onComplete={() => setLoading(false)} />}
@@ -105,8 +107,8 @@ function App() {
       <Navigation />
       <main>
         <HeroSection />
-        <AboutSection />
         <PortfolioSection />
+        <AboutSection />
         <ServicesSection />
         <SocialMediaSection />
         <SoftwareSection />
@@ -114,7 +116,7 @@ function App() {
         <ContactSection />
       </main>
       <Footer />
-    </div>
+    </div></MotionConfig>
   );
 }
 

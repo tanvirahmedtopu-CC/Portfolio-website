@@ -47,6 +47,7 @@ const Footer = () => {
           <div className="flex items-center gap-4">
             <MagneticButton strength={0.25}>
               <motion.a
+                aria-label="Email Tanvir"
                 href="mailto:tanvir@tatmedia.xyz"
                 className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all duration-300"
                 whileHover={{ scale: 1.1, boxShadow: '0 0 20px rgba(34,211,238,0.2)' }}
@@ -57,6 +58,7 @@ const Footer = () => {
             </MagneticButton>
             <MagneticButton strength={0.25}>
               <motion.a
+                aria-label="Tanvir on Instagram"
                 href="https://instagram.com/tanvir.ahmed.topu"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -72,6 +74,7 @@ const Footer = () => {
           {/* Back to top */}
           <MagneticButton strength={0.25}>
             <motion.button
+              aria-label="Back to top"
               onClick={scrollToTop}
               className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all duration-300"
               whileHover={{ scale: 1.1, y: -2, boxShadow: '0 0 20px rgba(34,211,238,0.15)' }}

@@ -1,3 +1,4 @@
+import navigateToSection from '../lib/scrollToSection';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
@@ -28,10 +29,7 @@ const Navigation = () => {
   }, []);
 
   const scrollToSection = (href) => {
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+    navigateToSection(href);
     setMobileOpen(false);
   };
 
@@ -134,6 +132,8 @@ const Navigation = () => {
 
           {/* Mobile Menu Button */}
           <button
+            aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
+            aria-expanded={mobileOpen}
             onClick={() => setMobileOpen(!mobileOpen)}
             className="md:hidden text-white p-2"
           >

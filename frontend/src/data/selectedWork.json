@@ -1,0 +1,98 @@
+[
+  {
+    "id": "motion-story",
+    "title": "Stories in motion",
+    "category": "Motion & storytelling",
+    "kind": "short",
+    "duration": "1:09",
+    "landscape": false
+  },
+  {
+    "id": "ai-product",
+    "title": "A new kind of product film",
+    "category": "AI product creative",
+    "kind": "ai",
+    "duration": "0:18",
+    "landscape": true
+  },
+  {
+    "id": "restaurant",
+    "title": "A little seasonal magic",
+    "category": "Restaurant campaign",
+    "kind": "brand",
+    "duration": "0:37",
+    "landscape": false
+  },
+  {
+    "id": "skincare",
+    "title": "Skincare, made personal",
+    "category": "Beauty & UGC",
+    "kind": "short",
+    "duration": "1:20",
+    "landscape": false
+  },
+  {
+    "id": "west-coast",
+    "title": "Local service. Lasting impact.",
+    "category": "Service brand creative",
+    "kind": "brand",
+    "duration": "0:52",
+    "landscape": false
+  },
+  {
+    "id": "ai-ugc",
+    "title": "An everyday story, reimagined",
+    "category": "AI UGC",
+    "kind": "ai",
+    "duration": "0:29",
+    "landscape": false
+  },
+  {
+    "id": "parenting",
+    "title": "Small moments. Big feelings.",
+    "category": "Educational short-form",
+    "kind": "short",
+    "duration": "0:29",
+    "landscape": false
+  },
+  {
+    "id": "new-year",
+    "title": "A fresh start",
+    "category": "Social campaign",
+    "kind": "brand",
+    "duration": "0:26",
+    "landscape": false
+  },
+  {
+    "id": "bloc",
+    "title": "The people behind the brand",
+    "category": "Interview & storytelling",
+    "kind": "brand",
+    "duration": "1:13",
+    "landscape": false
+  },
+  {
+    "id": "real-estate",
+    "title": "More than a place",
+    "category": "Real estate storytelling",
+    "kind": "short",
+    "duration": "1:10",
+    "landscape": false
+  },
+  {
+    "id": "arcads",
+    "title": "Straight to the point",
+    "category": "AI UGC creative",
+    "kind": "ai",
+    "duration": "0:15",
+    "landscape": false
+  },
+  {
+    "id": "psp",
+    "title": "Inside the story",
+    "category": "Long-form edit",
+    "kind": "brand",
+    "duration": "2:56",
+    "landscape": false
+  }
+]

@@ -71,24 +71,6 @@ export const softwareTools = [
   }
 ];
 
-export const aiModels = [
-  { id: 1, name: "Google Veo 3.2", logo: "https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg" },
-  { id: 2, name: "Sora 2", logo: "https://cdn.worldvectorlogo.com/logos/openai-2.svg" },
-  { id: 3, name: "Kling 3.0", logo: "https://images.crunchbase.com/image/upload/c_pad,h_256,w_256,f_auto,q_auto:eco,dpr_1/vpubqpjwlhhvqnqwvzqx" },
-  { id: 4, name: "Seedream 4", logo: "https://images.crunchbase.com/image/upload/c_pad,h_256,w_256,f_auto,q_auto:eco,dpr_1/6d07a84fd16c75bc3ff4" },
-  { id: 5, name: "Claude 4.5 Opus", logo: "https://cdn.worldvectorlogo.com/logos/anthropic-1.svg" }
-];
-
-export const aiPlatforms = [
-  { id: 1, name: "Higgsfield", logo: "https://images.crunchbase.com/image/upload/c_pad,h_256,w_256,f_auto,q_auto:eco,dpr_1/kfbjkj9ry2m6hc2uihrb" },
-  { id: 2, name: "HeyGen", logo: "https://images.crunchbase.com/image/upload/c_pad,h_256,w_256,f_auto,q_auto:eco,dpr_1/ba9pnbfbcsmf7tvz8u0i" },
-  { id: 3, name: "Runway", logo: "https://images.crunchbase.com/image/upload/c_pad,h_256,w_256,f_auto,q_auto:eco,dpr_1/yntvdwkxhmgiknjlutdq" },
-  { id: 4, name: "InVideo", logo: "https://images.crunchbase.com/image/upload/c_pad,h_256,w_256,f_auto,q_auto:eco,dpr_1/zfjcokexrnaxczbqgqgd" },
-  { id: 5, name: "Captions", logo: "https://images.crunchbase.com/image/upload/c_pad,h_256,w_256,f_auto,q_auto:eco,dpr_1/rkpxkpxbzqh4ddpufshu" },
-  { id: 6, name: "Opus Clip", logo: "https://images.crunchbase.com/image/upload/c_pad,h_256,w_256,f_auto,q_auto:eco,dpr_1/jbbpewchqkcqxxqovxvt" },
-  { id: 7, name: "Descript", logo: "https://images.crunchbase.com/image/upload/c_pad,h_256,w_256,f_auto,q_auto:eco,dpr_1/v1455657657/xvq6xspgmhbzdejt0jlo.png" }
-];
-
 export const contactInfo = {
   headline: "Let's Build Something Exceptional.",
   email: "tanvir@tatmedia.xyz",

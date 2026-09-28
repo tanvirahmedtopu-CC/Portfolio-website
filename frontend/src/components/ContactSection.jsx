@@ -15,17 +15,14 @@ const ContactSection = () => {
     email: '',
     message: ''
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [draftOpened, setDraftOpened] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsSubmitting(false);
-    setSubmitted(true);
-    setFormData({ name: '', email: '', message: '' });
-    setTimeout(() => setSubmitted(false), 3000);
+    const subject = encodeURIComponent(`Project inquiry from ${formData.name}`);
+    const body = encodeURIComponent(`${formData.message}\n\nFrom: ${formData.name}\nEmail: ${formData.email}`);
+    window.location.href = `mailto:${contactInfo.email}?subject=${subject}&body=${body}`;
+    setDraftOpened(true);
   };
 
   const handleChange = (e) => {
@@ -144,9 +141,11 @@ const ContactSection = () => {
                 
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div>
-                    <label className="text-white/50 text-sm mb-2 block">Name</label>
+                    <label htmlFor="contact-name" className="text-white/50 text-sm mb-2 block">Name</label>
                     <Input
                       type="text"
+                      id="contact-name"
+                      autoComplete="name"
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
@@ -157,9 +156,11 @@ const ContactSection = () => {
                   </div>
 
                   <div>
-                    <label className="text-white/50 text-sm mb-2 block">Email</label>
+                    <label htmlFor="contact-email" className="text-white/50 text-sm mb-2 block">Email</label>
                     <Input
                       type="email"
+                      id="contact-email"
+                      autoComplete="email"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
@@ -170,8 +171,9 @@ const ContactSection = () => {
                   </div>
 
                   <div>
-                    <label className="text-white/50 text-sm mb-2 block">Message</label>
+                    <label htmlFor="contact-message" className="text-white/50 text-sm mb-2 block">Message</label>
                     <Textarea
+                      id="contact-message"
                       name="message"
                       value={formData.message}
                       onChange={handleChange}
@@ -185,7 +187,6 @@ const ContactSection = () => {
                   <MagneticButton strength={0.1} className="w-full">
                     <motion.button
                       type="submit"
-                      disabled={isSubmitting}
                       className="
                         w-full
                         flex items-center justify-center gap-3
@@ -208,28 +209,10 @@ const ContactSection = () => {
                       {/* Shimmer sweep */}
                       <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700" />
                       
-                      {isSubmitting ? (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                          className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
-                        />
-                      ) : submitted ? (
-                        <motion.span
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          className="text-cyan-400"
-                        >
-                          ✓ Message Sent!
-                        </motion.span>
-                      ) : (
-                        <span className="relative z-10 flex items-center gap-3">
-                          <Send size={18} />
-                          Send Message
-                        </span>
-                      )}
+                      <span className="relative z-10 flex items-center gap-3"><Send size={18} />Open email draft</span>
                     </motion.button>
                   </MagneticButton>
+                  <p className="text-white/50 text-xs leading-relaxed" role="status">{draftOpened ? 'Finish sending in your email app. If no draft opened, email tanvir@tatmedia.xyz directly. Your message is still here.' : 'Opens your email app with the details above. You review and send.'}</p>
                 </form>
               </div>
             </div>

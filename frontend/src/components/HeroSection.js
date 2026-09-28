@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import navigateToSection from '../lib/scrollToSection';
+import React, { useEffect, useRef } from 'react';
+import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { ArrowRight, Play } from 'lucide-react';
 import { heroContent } from '../data/mock';
 import MagneticButton from './ui/MagneticButton';
-import FloatingParticles from './ui/FloatingParticles';
 
 // ─── RANDOM COLOR HELPERS ─────────────────────────────────────────────────────
 const randomHex = () =>
@@ -69,6 +69,7 @@ const TubesBackground = ({ onClick }) => {
 // ─── HERO SECTION ─────────────────────────────────────────────────────────────
 const HeroSection = () => {
   const sectionRef = useRef(null);
+  const reduced = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start start', 'end start'],
@@ -79,8 +80,7 @@ const HeroSection = () => {
   const overlayOpacity = useTransform(scrollYProgress, [0, 0.5], [0.72, 0.95]);
 
   const scrollToSection = (href) => {
-    const el = document.querySelector(href);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    navigateToSection(href);
   };
 
   // Word-by-word stagger container
@@ -109,16 +109,8 @@ const HeroSection = () => {
       ref={sectionRef}
       className="relative min-h-[75vh] md:min-h-screen flex items-center justify-center overflow-hidden bg-black"
     >
-      {/* Tubes canvas */}
-      <TubesBackground />
-
-      {/* Three.js floating particles overlay */}
-      <FloatingParticles
-        count={60}
-        color="#22d3ee"
-        speed={0.2}
-        style={{ zIndex: 1, opacity: 0.5 }}
-      />
+      {/* Keep the signature cursor artwork; avoid a second WebGL renderer. */}
+      {!reduced && <TubesBackground />}
 
       {/* Overlay with parallax */}
       <motion.div
@@ -143,7 +135,7 @@ const HeroSection = () => {
           pass through to the tubes canvas; md+ restores normal behavior */}
       <motion.div
         className="relative max-w-5xl mx-auto px-6 lg:px-8 py-16 md:py-0 text-center pointer-events-none md:pointer-events-auto"
-        style={{ zIndex: 2, y: contentY }}
+        style={{ zIndex: 2, y: reduced ? 0 : contentY }}
       >
         {/* Tagline pill */}
         <motion.div

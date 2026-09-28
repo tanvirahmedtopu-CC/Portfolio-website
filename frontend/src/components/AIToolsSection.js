@@ -1,244 +1,26 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { motion } from 'framer-motion';
-import { Cpu, Boxes } from 'lucide-react';
-import { aiModels, aiPlatforms } from '../data/mock';
-import SmoothReveal from './ui/SmoothReveal';
-import TextReveal from './ui/TextReveal';
+import React, { useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { ArrowRight, ArrowUpRight, Sparkles } from 'lucide-react';
+import { aiWorkflow } from '../data/aiWorkflow';
 
-// ─── BRAND COLORS & LOGOS ─────────────────────────────────────────────────────
-const L = (slug) => `https://unpkg.com/@lobehub/icons-static-png@latest/light/${slug}.png`;
-
-const TOOL_META = {
-  'Google Veo 3.2': { logo: L('google-deepmind'), color: '#4285F4', bg: 'rgba(66,133,244,0.12)', border: 'rgba(66,133,244,0.3)' },
-  'Sora 2': { logo: L('sora'), color: '#10A37F', bg: 'rgba(16,163,127,0.12)', border: 'rgba(16,163,127,0.3)' },
-  'Kling 3.0': { logo: L('kling'), color: '#FF6B35', bg: 'rgba(255,107,53,0.12)', border: 'rgba(255,107,53,0.3)' },
-  'Seedream 4': { logo: L('bytedance'), color: '#FE2C55', bg: 'rgba(254,44,85,0.12)', border: 'rgba(254,44,85,0.3)' },
-  'Claude 4.5 Opus': { logo: L('claude'), color: '#D97706', bg: 'rgba(217,119,6,0.12)', border: 'rgba(217,119,6,0.3)' },
-  'Higgsfield': { logo: L('higgsfield'), color: '#00FF88', bg: 'rgba(0,255,136,0.1)', border: 'rgba(0,255,136,0.28)' },
-  'HeyGen': { logo: L('heygen'), color: '#7C3AED', bg: 'rgba(124,58,237,0.12)', border: 'rgba(124,58,237,0.3)' },
-  'Runway': { logo: L('runway'), color: '#FFFFFF', bg: 'rgba(255,255,255,0.08)', border: 'rgba(255,255,255,0.2)' },
-  'InVideo': { logo: L('invideo'), color: '#6D28D9', bg: 'rgba(109,40,217,0.12)', border: 'rgba(109,40,217,0.3)' },
-  'Captions': { logo: L('captions'), color: '#EC4899', bg: 'rgba(236,72,153,0.12)', border: 'rgba(236,72,153,0.3)' },
-  'Opus Clip': { logo: L('opus-clip'), color: '#F59E0B', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.3)' },
-  'Descript': { logo: L('descript'), color: '#10B981', bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.3)' },
-  'Canva': { logo: L('canva'), color: '#00C4CC', bg: 'rgba(0,196,204,0.12)', border: 'rgba(0,196,204,0.3)' },
-};
-
-// ─── LOGO WITH FALLBACK ───────────────────────────────────────────────────────
-const LogoImg = ({ name, size = 40 }) => {
-  const [failed, setFailed] = useState(false);
-  const meta = TOOL_META[name] || {};
-
-  if (failed || !meta.logo) {
-    return (
-      <div
-        className="flex items-center justify-center rounded-lg text-sm font-bold"
-        style={{ width: size, height: size, background: meta.bg || 'rgba(255,255,255,0.06)', color: meta.color || 'rgba(255,255,255,0.6)', fontFamily: "'Sora', sans-serif" }}
-      >
-        {name.charAt(0)}
+export default function AIToolsSection() {
+  const [active, setActive] = useState(1);
+  const reduced = useReducedMotion();
+  const stage = aiWorkflow[active];
+  return <section id="ai" className="ai-studio" aria-labelledby="ai-heading">
+    <div className="studio-shell">
+      <div className="section-kicker"><span className="status-light" /> The creative toolkit<span className="kicker-end">HUMAN DIRECTION × AI POSSIBILITY</span></div>
+      <div className="ai-heading-row"><h2 id="ai-heading">Powered by AI.<br /><span className="studio-gradient">Directed by instinct.</span></h2><p>The tools evolve. The eye for a good story stays.<br />Explore the workflow behind the work.</p></div>
+      <div className="ai-workbench">
+        <div className="workflow-nav" aria-label="Explore the creative workflow">{aiWorkflow.map((item, i) => <button key={item.id} onClick={() => setActive(i)} aria-pressed={active === i} aria-controls="workflow-panel"><span className="workflow-number">{item.number}</span><span>{item.label}</span><ArrowRight size={18} /></button>)}</div>
+        <div id="workflow-panel" className="workflow-panel" aria-live="polite">
+          <AnimatePresence mode="wait" initial={false}><motion.div key={stage.id} className="workflow-content" initial={{ opacity: 0, y: reduced ? 0 : 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
+            <div className="workflow-story"><span className="workflow-eyebrow"><Sparkles size={15} /> {stage.label} / {stage.number}</span><h3>{stage.subtitle}</h3><p>{stage.description}</p><div className={`workflow-art art-${stage.id}`} aria-hidden="true"><div className="art-frame art-frame-back"><img src={`${process.env.PUBLIC_URL}/media/work/restaurant.jpg`} alt="" loading="lazy" /></div><div className="art-frame art-frame-main"><img src={`${process.env.PUBLIC_URL}/media/work/${stage.image}.jpg`} alt="" loading="lazy" /><span>TAT. / CREATIVE STUDIO</span></div><div className="art-frame art-frame-front"><img src={`${process.env.PUBLIC_URL}/media/work/ai-ugc.jpg`} alt="" loading="lazy" /></div><div className="art-timeline"><i /><i /><i /><i /><span /></div></div><span className="workflow-output">{stage.output}</span></div>
+            <div className="workflow-tools"><span className="tools-heading">THE TOOLS BEHIND THIS STAGE</span>{stage.tools.map(tool => <a className="workflow-tool" key={tool.name} href={tool.url} target="_blank" rel="noreferrer"><span className="tool-monogram" aria-hidden="true">{tool.mark}</span><span><strong>{tool.name}</strong><small>{tool.role}</small></span><ArrowUpRight size={17} /></a>)}<p className="tool-note">Technology is the starting point.<br />Taste brings it all together.</p></div>
+          </motion.div></AnimatePresence>
+        </div>
       </div>
-    );
-  }
-
-  return (
-    <img src={meta.logo} alt={name} width={size} height={size}
-      style={{ objectFit: 'contain', borderRadius: 6 }} onError={() => setFailed(true)} loading="lazy" />
-  );
-};
-
-// ─── TOOL CARD WITH 3D TILT ──────────────────────────────────────────────────
-const ToolCard = ({ name, delay: delayProp }) => {
-  const [hovered, setHovered] = useState(false);
-  const meta = TOOL_META[name] || { color: '#22d3ee', bg: 'rgba(34,211,238,0.08)', border: 'rgba(34,211,238,0.2)' };
-  const cardRef = useRef(null);
-  const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
-
-  const handleMouseMove = useCallback((e) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-    setTilt({
-      rotateX: (y - 0.5) * -8,
-      rotateY: (x - 0.5) * 8,
-    });
-  }, []);
-
-  const handleMouseLeave = () => {
-    setTilt({ rotateX: 0, rotateY: 0 });
-    setHovered(false);
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20, filter: 'blur(5px)' }}
-      whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.4, delay: delayProp, ease: [0.16, 1, 0.3, 1] }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      ref={cardRef}
-    >
-      <div
-        className="relative flex flex-col items-center gap-3 p-4 rounded-2xl cursor-default text-center overflow-hidden"
-        style={{
-          background: hovered ? meta.bg : 'rgba(255,255,255,0.03)',
-          border: `1px solid ${hovered ? meta.border : 'rgba(255,255,255,0.07)'}`,
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          boxShadow: hovered
-            ? `0 8px 32px ${meta.bg}, 0 0 0 1px ${meta.border}, inset 0 1px 0 rgba(255,255,255,0.1)`
-            : '0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04)',
-          transition: 'background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, transform 0.12s ease-out',
-          transform: `perspective(600px) rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) ${hovered ? 'scale3d(1.05,1.05,1.05)' : ''}`,
-          transformStyle: 'preserve-3d',
-        }}
-      >
-        {/* Top shimmer */}
-        <div className="absolute top-0 left-0 right-0 h-px"
-          style={{
-            background: hovered
-              ? `linear-gradient(90deg, transparent, ${meta.color}60, transparent)`
-              : 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)',
-            transition: 'background 0.35s ease',
-          }}
-        />
-
-        {/* Corner glow */}
-        <div className="absolute -top-6 -right-6 w-16 h-16 rounded-full pointer-events-none"
-          style={{
-            background: `radial-gradient(circle, ${meta.bg} 0%, transparent 70%)`,
-            opacity: hovered ? 1 : 0,
-            transition: 'opacity 0.35s ease',
-          }}
-        />
-
-        {/* Logo container */}
-        <motion.div
-          className="relative flex items-center justify-center rounded-xl transition-all duration-300"
-          style={{
-            width: 48, height: 48,
-            background: hovered ? meta.bg : 'rgba(255,255,255,0.05)',
-            border: `1px solid ${hovered ? meta.border : 'rgba(255,255,255,0.08)'}`,
-            padding: 6,
-          }}
-          animate={hovered ? { rotate: [0, 5, -5, 0] } : {}}
-          transition={{ duration: 0.5, ease: 'easeInOut' }}
-        >
-          <LogoImg name={name} size={32} />
-        </motion.div>
-
-        {/* Name */}
-        <p className="text-xs font-medium leading-tight"
-          style={{
-            color: hovered ? meta.color : 'rgba(255,255,255,0.45)',
-            fontFamily: "'Sora', sans-serif",
-            letterSpacing: '-0.01em',
-            transition: 'color 0.3s ease',
-          }}
-        >
-          {name}
-        </p>
-
-        {/* Bottom accent */}
-        <div className="absolute bottom-0 left-0 right-0 h-px"
-          style={{
-            background: `linear-gradient(90deg, transparent, ${meta.color}${hovered ? '40' : '10'}, transparent)`,
-            transition: 'background 0.35s ease',
-          }}
-        />
-      </div>
-    </motion.div>
-  );
-};
-
-// ─── SECTION DIVIDER ─────────────────────────────────────────────────────────
-const SubHeader = ({ icon: Icon, label, delay: delayProp }) => (
-  <SmoothReveal direction="left" delay={delayProp} blur className="flex items-center gap-3 mb-6">
-    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-      style={{ background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.2)' }}>
-      <Icon size={15} className="text-cyan-400" />
+      <div className="ai-footnote"><span>Always exploring. Always refining.</span><a href="#portfolio">See what it makes possible <ArrowUpRight size={16} /></a></div>
     </div>
-    <span className="text-xs font-medium tracking-[0.18em] uppercase"
-      style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Sora', sans-serif" }}>
-      {label}
-    </span>
-    <div className="flex-1 h-px"
-      style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.07), transparent)' }} />
-  </SmoothReveal>
-);
-
-// ─── MAIN SECTION ─────────────────────────────────────────────────────────────
-const AIToolsSection = () => {
-  const platforms = aiPlatforms.some(p => p.name === 'Canva')
-    ? aiPlatforms
-    : [...aiPlatforms, { id: 'canva', name: 'Canva' }];
-
-  return (
-    <section id="ai" className="relative py-32 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-[#05070d] to-black" />
-
-      <motion.div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.04) 0%, transparent 70%)' }}
-        animate={{ x: [0, 50, 0], y: [0, -25, 0] }}
-        transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }} />
-      <motion.div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(129,140,248,0.04) 0%, transparent 70%)' }}
-        animate={{ x: [0, -40, 0], y: [0, 20, 0] }}
-        transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }} />
-
-      <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <SmoothReveal blur>
-            <span className="block text-xs font-mono tracking-[0.28em] uppercase mb-4 text-cyan-400"
-              style={{ fontFamily: "'Sora', sans-serif" }}>
-              AI Technology
-            </span>
-          </SmoothReveal>
-
-          <TextReveal
-            text="AI Models & Tools"
-            highlightWords={['Tools']}
-            highlightClass="bg-gradient-to-r from-cyan-300 to-indigo-400 bg-clip-text text-transparent"
-            className="text-4xl md:text-5xl font-semibold text-white mb-4 justify-center"
-            staggerDelay={0.07}
-            delay={0.1}
-          />
-
-          <SmoothReveal blur delay={0.3}>
-            <p className="text-sm leading-relaxed max-w-md mx-auto"
-              style={{ color: 'rgba(255,255,255,0.3)', fontFamily: "'Sora', sans-serif" }}>
-              Leveraging frontier AI to create the future of video content
-            </p>
-          </SmoothReveal>
-        </div>
-
-        {/* AI Models */}
-        <div className="mb-14">
-          <SubHeader icon={Cpu} label="AI Models" delay={0} />
-          <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
-            {aiModels.map((model, i) => (
-              <ToolCard key={model.id} name={model.name} delay={0.06 * i} />
-            ))}
-          </div>
-        </div>
-
-        {/* AI Platforms */}
-        <div>
-          <SubHeader icon={Boxes} label="AI Creation Platforms" delay={0.05} />
-          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3">
-            {platforms.map((platform, i) => (
-              <ToolCard key={platform.id} name={platform.name} delay={0.04 * i} />
-            ))}
-          </div>
-        </div>
-      </div>
-      
-      <div className="absolute bottom-0 left-0 right-0 section-separator" />
-    </section>
-  );
-};
-
-export default AIToolsSection;
+  </section>;
+}
