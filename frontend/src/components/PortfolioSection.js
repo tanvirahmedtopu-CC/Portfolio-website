@@ -55,13 +55,18 @@ function CollectionStack({ collection, onOpen, busy }) {
     { x: 27, y: -5, rotate: 9 },
     { x: 0, y: 10, rotate: -3 },
   ];
+  // Only a real mouse movement opens the fan. Page scroll slides stacks under a resting
+  // cursor; reacting to that shook the cards and started previews mid-scroll.
   return (
     <button
       className="collection-stack"
       style={{ '--stack-accent': collection.accent }}
-      onMouseEnter={() => { if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) setHovered(true); }}
-      onMouseLeave={() => setHovered(false)}
-      onFocus={() => setHovered(true)}
+      onPointerMove={event => {
+        if (hovered || event.pointerType !== 'mouse' || (!event.movementX && !event.movementY) || window.__lenis?.isScrolling) return;
+        if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) setHovered(true);
+      }}
+      onPointerLeave={() => setHovered(false)}
+      onFocus={event => { let keyboard = true; try { keyboard = event.currentTarget.matches(':focus-visible'); } catch {} if (keyboard) setHovered(true); }}
       onBlur={() => setHovered(false)}
       onClick={event => onOpen(collection, event.currentTarget)}
       aria-label={`Open ${collection.label} collection, ${count} films`}
@@ -135,7 +140,7 @@ export default function PortfolioSection() {
           <div className="work-intro"><p>Edits, brand stories and AI experiments.<br />A few favourites, collected for you.</p><span><Layers size={15} /><span className="stack-desktop-hint">Hover to peek. Click to explore.</span><span className="stack-touch-hint">Swipe the stacks. Tap to explore.</span></span></div>
         </div>
       </div>
-      <div className="stack-shelf" role="group" aria-label="Portfolio collections" data-lenis-prevent-wheel>
+      <div className="stack-shelf" role="group" aria-label="Portfolio collections" data-lenis-prevent-horizontal>
         {collections.map(item => <CollectionStack key={item.id} collection={item} onOpen={openCollection} busy={!!collection} />)}
       </div>
       <div className="studio-shell">

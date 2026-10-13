@@ -25,7 +25,7 @@ export default function SocialMediaSection() {
         <div className="section-kicker"><span className="status-light pink" /> Social media management<span className="kicker-end">REAL BRANDS. REAL PRESENCE.</span></div>
         <div className="brands-heading-row"><h2 id="brands-heading">Brands I’ve<br /><span className="pink-gradient">helped move forward.</span></h2><p>Different voices. Different audiences.<br />The same care in every post.<span>{enabled ? <ArrowDown size={15} /> : <ArrowRight size={15} />}{enabled ? 'Keep scrolling to explore' : 'Swipe or scroll to explore'}</span></p></div>
       </div>
-      <div ref={rail} className="brand-rail" tabIndex={0} role="region" aria-label="Brands I’ve managed. Scroll to explore all ten profiles; use arrow keys on desktop." onKeyDown={onKeyDown} data-lenis-prevent={!enabled ? true : undefined}>
+      <div ref={rail} className="brand-rail" tabIndex={0} role="region" aria-label="Brands I’ve managed. Scroll to explore all ten profiles; use arrow keys on desktop." onKeyDown={onKeyDown} data-lenis-prevent-horizontal={!enabled ? true : undefined}>
         <motion.div className="brand-track" style={{ x: enabled ? x : 0 }}>{socialMediaScreenshots.map((brand, index) => <figure className="brand-profile" key={brand.id}>
           <div className="brand-phone"><div className="phone-island" /><img src={brand.image} alt={`${brand.brand} ${brand.platform} profile`} loading="lazy" width="260" height="540" /><div className="phone-home" /></div>
           <figcaption><span className="brand-platform">{brand.platform === 'instagram' ? <Instagram size={16} /> : <Youtube size={16} />}{brand.brand}</span><span className="brand-number">{String(index+1).padStart(2,'0')} / 10</span></figcaption>

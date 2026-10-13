@@ -1,6 +1,6 @@
 import navigateToSection from '../lib/scrollToSection';
 import React, { useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
+import { motion, useMotionValue, useReducedMotion, frame, cancelFrame } from 'framer-motion';
 import { ArrowRight, Play } from 'lucide-react';
 import { heroContent } from '../data/mock';
 import MagneticButton from './ui/MagneticButton';
@@ -38,6 +38,11 @@ const TubesBackground = ({ onClick }) => {
             },
           },
         });
+        // The library forces a 2x pixel ratio (even on 1x screens) under a bloom pass.
+        // A lighter ratio keeps the same soft glow and frees the GPU for smooth scrolling.
+        app.three.minPixelRatio = 1;
+        app.three.maxPixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+        app.three.resize();
         tubesRef.current = app;
       } catch (err) {
         console.error('Tubes load error:', err);
@@ -45,7 +50,11 @@ const TubesBackground = ({ onClick }) => {
     };
 
     init();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+      tubesRef.current?.dispose();
+      tubesRef.current = null;
+    };
   }, []);
 
   const handleClick = () => {
@@ -70,14 +79,36 @@ const TubesBackground = ({ onClick }) => {
 const HeroSection = () => {
   const sectionRef = useRef(null);
   const reduced = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start start', 'end start'],
-  });
+  const contentY = useMotionValue(0);
+  const overlayOpacity = useMotionValue(0.72);
+  const contentOpacity = useMotionValue(1);
 
-  // Parallax transforms
-  const contentY = useTransform(scrollYProgress, [0, 1], [0, 150]);
-  const overlayOpacity = useTransform(scrollYProgress, [0, 0.5], [0.72, 0.95]);
+  // Parallax reads the scroll position after Lenis moves the page in the same frame.
+  // Scroll events arrive a frame late, which made the hero copy trail and shake.
+  useEffect(() => {
+    const section = sectionRef.current;
+    let top = 0;
+    let height = 1;
+    const measure = () => {
+      top = section.offsetTop;
+      height = section.offsetHeight || 1;
+    };
+    const sync = () => {
+      const progress = Math.min(1, Math.max(0, (window.scrollY - top) / height));
+      contentY.set(progress * 150);
+      overlayOpacity.set(0.72 + 0.23 * Math.min(1, progress / 0.5));
+      // Fade the copy before parallax pushes it into the clipped bottom edge.
+      contentOpacity.set(1 - Math.min(1, Math.max(0, (progress - 0.4) / 0.45)));
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(section);
+    measure();
+    frame.preRender(sync, true);
+    return () => {
+      observer.disconnect();
+      cancelFrame(sync);
+    };
+  }, [contentY, overlayOpacity, contentOpacity]);
 
   const scrollToSection = (href) => {
     navigateToSection(href);
@@ -135,7 +166,7 @@ const HeroSection = () => {
           pass through to the tubes canvas; md+ restores normal behavior */}
       <motion.div
         className="relative max-w-5xl mx-auto px-6 lg:px-8 py-16 md:py-0 text-center pointer-events-none md:pointer-events-auto"
-        style={{ zIndex: 2, y: reduced ? 0 : contentY }}
+        style={{ zIndex: 2, y: reduced ? 0 : contentY, opacity: contentOpacity }}
       >
         {/* Tagline pill */}
         <motion.div
@@ -166,7 +197,6 @@ const HeroSection = () => {
                   ? 'bg-gradient-to-r from-cyan-300 to-blue-400 bg-clip-text text-transparent'
                   : ''
               }`}
-              style={{ willChange: 'transform, opacity, filter' }}
             >
               {word}
             </motion.span>
@@ -218,37 +248,39 @@ const HeroSection = () => {
         </motion.div>
       </motion.div>
 
-      {/* Click hint */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2.5, duration: 1 }}
-        className="hidden sm:block absolute bottom-20 left-1/2 -translate-x-1/2 pointer-events-none"
-        style={{ zIndex: 2 }}
-      >
-        <p className="text-white/20 text-xs font-mono tracking-widest uppercase">
-          Click background to randomize colors
-        </p>
-      </motion.div>
-
-      {/* Scroll indicator — hidden on mobile to save space */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
-        className="hidden sm:block absolute bottom-8 left-1/2 -translate-x-1/2"
-        style={{ zIndex: 2 }}
-      >
+      <motion.div className="absolute inset-0 pointer-events-none" style={{ zIndex: 2, opacity: contentOpacity }}>
+        {/* Click hint */}
         <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-6 h-10 border-2 border-white/20 rounded-full flex items-start justify-center p-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2.5, duration: 1 }}
+          className="hidden sm:block absolute bottom-20 left-1/2 -translate-x-1/2 pointer-events-none"
+          style={{ zIndex: 2 }}
+        >
+          <p className="text-white/20 text-xs font-mono tracking-widest uppercase">
+            Click background to randomize colors
+          </p>
+        </motion.div>
+
+        {/* Scroll indicator — hidden on mobile to save space */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5, duration: 1 }}
+          className="hidden sm:block absolute bottom-8 left-1/2 -translate-x-1/2"
+          style={{ zIndex: 2 }}
         >
           <motion.div
-            animate={{ opacity: [0.5, 1, 0.5], height: ['4px', '8px', '4px'] }}
+            animate={{ y: [0, 10, 0] }}
             transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            className="w-1 bg-white/50 rounded-full"
-          />
+            className="w-6 h-10 border-2 border-white/20 rounded-full flex items-start justify-center p-2"
+          >
+            <motion.div
+              animate={{ opacity: [0.5, 1, 0.5], scaleY: [1, 2, 1] }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+              className="w-1 h-1 origin-top bg-white/50 rounded-full"
+            />
+          </motion.div>
         </motion.div>
       </motion.div>
     </section>

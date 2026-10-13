@@ -65,7 +65,7 @@
   .portfolio-stacks .work-intro p { font-size: 12px; }
   .stack-desktop-hint { display: none; }
   .stack-touch-hint { display: inline; }
-  .stack-shelf { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; gap: 0; padding: 5px 22px 5px; scroll-padding-inline: 22px; }
+  .stack-shelf { display: flex; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; gap: 0; padding: 5px 22px 5px; scroll-padding-inline: 22px; }
   .stack-shelf::-webkit-scrollbar { display: none; }
   .collection-stack { flex: 0 0 82%; scroll-snap-align: center; }
   .stack-stage { transform: scale(.9); margin: -15px -15px -18px; }

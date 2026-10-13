@@ -22,3 +22,14 @@ Reduced motion and Save-Data fallbacks are implemented. Physical-device Safari a
 - Escape from film returns to collection and focuses that film. A second Escape closes and restores focus to the originating stack.
 - Production build passes after removing obsolete gallery CSS.
 - Mobile at 390 px: no page overflow; the three stacks use one horizontal shelf. AI collection opens three films in a two-column dialog. Full video confirmed playing at readyState 4.
+
+## Smooth scroll fix — October 13, 2026
+
+- Cause: the stack shelf carried `data-lenis-prevent-wheel`, so the wheel switched from Lenis to native scrolling whenever the shelf slid under the cursor. The two fought and the page stuttered between the hero and the portfolio. The shelf and the brand rail now hand only horizontal gestures to the browser; vertical wheel stays smooth.
+- Hero parallax now reads the scroll position in the same frame Lenis moves the page (Lenis runs on Framer Motion's frame loop). Headless Chrome, 1440 × 900: 83 of 188 frames had the hero copy out of sync by up to 13 px before; 0 frames after.
+- Wheel test over the shelf: unsmoothed 60 px jumps before; scroll stays in Lenis smooth mode after.
+- Stacks fan only on real mouse movement, not when page scroll moves them under a resting cursor.
+- Hero copy and hints fade as the hero leaves, so parallax no longer shows a clipped CTA under the nav on mobile.
+- Tubes renderer capped at 1.5× pixel ratio (the library forced 2× with bloom) and disposed on unmount.
+- Nav clears its active link back in the hero and reads layout at most once per frame. Custom cursor moves with transforms. Added a favicon (removes a 404).
+- Rechecked: collection dialog opens, blocks page scroll, closes on Escape and scrolling resumes; mobile 390 px has no page overflow and the shelf still swipes.

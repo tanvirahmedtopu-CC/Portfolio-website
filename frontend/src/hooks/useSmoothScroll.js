@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { frame, cancelFrame } from 'framer-motion';
 import Lenis from 'lenis';
 
 /**
@@ -23,19 +24,16 @@ const useSmoothScroll = () => {
 
     lenisRef.current = lenis;
 
-    let frame;
-    function raf(time) {
-      lenis.raf(time);
-      frame = requestAnimationFrame(raf);
-    }
-
-    frame = requestAnimationFrame(raf);
+    // Drive Lenis from Framer Motion's frame loop so the scroll position and every
+    // scroll-linked animation update in the same frame instead of two competing loops.
+    const update = ({ timestamp }) => lenis.raf(timestamp);
+    frame.update(update, true);
 
     // Make lenis available globally for scroll-to functionality
     window.__lenis = lenis;
 
     return () => {
-      cancelAnimationFrame(frame);
+      cancelFrame(update);
       lenis.destroy();
       window.__lenis = null;
     };

@@ -11,21 +11,27 @@ const Navigation = () => {
   const [activeSection, setActiveSection] = useState('');
 
   useEffect(() => {
-    const handleScroll = () => {
+    const sections = navLinks.map(l => l.href.replace('#', '')).reverse();
+    let pending = 0;
+    const update = () => {
+      pending = 0;
       setScrolled(window.scrollY > 50);
-      
-      // Track active section
-      const sections = navLinks.map(l => l.href.replace('#', ''));
-      for (const id of sections.reverse()) {
+
+      // Track active section; clear it back in the hero.
+      const current = sections.find(id => {
         const el = document.getElementById(id);
-        if (el && el.getBoundingClientRect().top < 200) {
-          setActiveSection(id);
-          break;
-        }
-      }
+        return el && el.getBoundingClientRect().top < 200;
+      });
+      setActiveSection(current || '');
     };
+    // At most one layout read per frame, however many scroll events arrive.
+    const handleScroll = () => { if (!pending) pending = requestAnimationFrame(update); };
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    update();
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      cancelAnimationFrame(pending);
+    };
   }, []);
 
   const scrollToSection = (href) => {
@@ -41,7 +47,7 @@ const Navigation = () => {
         transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
         className={`
           fixed top-0 left-0 right-0 z-50
-          transition-all duration-700 ease-out
+          transition-[padding,background-color,border-color,backdrop-filter] duration-700 ease-out
           ${scrolled 
             ? 'py-3 bg-black/50 backdrop-blur-2xl border-b border-white/[0.05]' 
             : 'py-6 bg-transparent'

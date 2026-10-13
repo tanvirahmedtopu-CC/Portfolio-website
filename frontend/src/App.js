@@ -25,8 +25,8 @@ const CustomCursor = () => {
 
   const moveCursor = useCallback((e) => {
     if (cursorRef.current) {
-      cursorRef.current.style.left = `${e.clientX}px`;
-      cursorRef.current.style.top = `${e.clientY}px`;
+      // Transform moves the ring on the compositor; left/top forced layout per mousemove.
+      cursorRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
     }
   }, []);
 
