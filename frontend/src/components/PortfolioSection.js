@@ -127,7 +127,7 @@ export default function PortfolioSection() {
   const closeCollection = () => { setCollection(null); setSelected(null); };
 
   return (
-    <section id="portfolio" className="portfolio-section portfolio-stacks" aria-labelledby="portfolio-heading">
+    <section id="portfolio" className="portfolio-section portfolio-stacks" aria-labelledby="portfolio-heading" style={{ contain: 'layout style', willChange: 'transform', transform: 'translateZ(0)' }}>
       <div className="studio-shell">
         <div className="section-kicker"><span className="status-light" /> Selected work <span className="kicker-end">12 FILMS / 3 COLLECTIONS</span></div>
         <div className="work-heading-row">
@@ -135,7 +135,7 @@ export default function PortfolioSection() {
           <div className="work-intro"><p>Edits, brand stories and AI experiments.<br />A few favourites, collected for you.</p><span><Layers size={15} /><span className="stack-desktop-hint">Hover to peek. Click to explore.</span><span className="stack-touch-hint">Swipe the stacks. Tap to explore.</span></span></div>
         </div>
       </div>
-      <div className="stack-shelf" role="group" aria-label="Portfolio collections" data-lenis-prevent-wheel>
+      <div className="stack-shelf" role="group" aria-label="Portfolio collections">
         {collections.map(item => <CollectionStack key={item.id} collection={item} onOpen={openCollection} busy={!!collection} />)}
       </div>
       <div className="studio-shell">

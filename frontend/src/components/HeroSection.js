@@ -61,7 +61,7 @@ const TubesBackground = ({ onClick }) => {
       ref={canvasRef}
       onClick={handleClick}
       className="absolute inset-0 w-full h-full block"
-      style={{ touchAction: 'pan-y', zIndex: 0 }}
+      style={{ touchAction: 'pan-y', zIndex: 0, willChange: 'transform', transform: 'translateZ(0)' }}
     />
   );
 };
@@ -75,9 +75,10 @@ const HeroSection = () => {
     offset: ['start start', 'end start'],
   });
 
-  // Parallax transforms
-  const contentY = useTransform(scrollYProgress, [0, 1], [0, 150]);
-  const overlayOpacity = useTransform(scrollYProgress, [0, 0.5], [0.72, 0.95]);
+  // Parallax transforms — keep the Y shift modest so it doesn't fight
+  // Lenis's interpolation on the Hero ↔ Portfolio boundary.
+  const contentY = useTransform(scrollYProgress, [0, 1], [0, 80]);
+  const overlayOpacity = useTransform(scrollYProgress, [0, 0.7], [0.72, 0.92]);
 
   const scrollToSection = (href) => {
     navigateToSection(href);
@@ -107,7 +108,8 @@ const HeroSection = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-[75vh] md:min-h-screen flex items-center justify-center overflow-hidden bg-black"
+      className="relative min-h-[75vh] md:min-h-screen flex items-center justify-center bg-black"
+      style={{ overflow: 'clip', willChange: 'transform', contain: 'paint' }}
     >
       {/* Keep the signature cursor artwork; avoid a second WebGL renderer. */}
       {!reduced && <TubesBackground />}
@@ -119,6 +121,8 @@ const HeroSection = () => {
           background: 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.3) 100%)',
           zIndex: 1,
           opacity: overlayOpacity,
+          willChange: 'opacity',
+          transform: 'translateZ(0)',
         }}
       />
 
@@ -135,7 +139,7 @@ const HeroSection = () => {
           pass through to the tubes canvas; md+ restores normal behavior */}
       <motion.div
         className="relative max-w-5xl mx-auto px-6 lg:px-8 py-16 md:py-0 text-center pointer-events-none md:pointer-events-auto"
-        style={{ zIndex: 2, y: reduced ? 0 : contentY }}
+        style={{ zIndex: 2, y: reduced ? 0 : contentY, willChange: 'transform', transform: 'translateZ(0)' }}
       >
         {/* Tagline pill */}
         <motion.div

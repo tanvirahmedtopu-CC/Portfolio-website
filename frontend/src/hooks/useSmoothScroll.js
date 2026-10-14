@@ -19,6 +19,9 @@ const useSmoothScroll = () => {
       smoothWheel: true,
       wheelMultiplier: 1,
       touchMultiplier: 2,
+      lerp: 0.08,
+      syncTouch: false,
+      autoResize: true,
     });
 
     lenisRef.current = lenis;

@@ -1,5 +1,5 @@
 /* Compact Dock-inspired collections. All films live in an on-demand window. */
-.portfolio-stacks { padding: 88px 0 48px; }
+.portfolio-stacks { padding: 88px 0 48px; transform: translateZ(0); }
 .portfolio-stacks .work-heading-row { margin: 25px 0 6px; align-items: center; }
 .portfolio-stacks .work-heading-row h2 { font-size: clamp(36px, 4vw, 56px); }
 .portfolio-stacks .work-intro { max-width: 285px; }
@@ -65,7 +65,7 @@
   .portfolio-stacks .work-intro p { font-size: 12px; }
   .stack-desktop-hint { display: none; }
   .stack-touch-hint { display: inline; }
-  .stack-shelf { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; gap: 0; padding: 5px 22px 5px; scroll-padding-inline: 22px; }
+  .stack-shelf { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; gap: 0; padding: 5px 22px 5px; scroll-padding-inline: 22px; overscroll-behavior: contain; }
   .stack-shelf::-webkit-scrollbar { display: none; }
   .collection-stack { flex: 0 0 82%; scroll-snap-align: center; }
   .stack-stage { transform: scale(.9); margin: -15px -15px -18px; }
